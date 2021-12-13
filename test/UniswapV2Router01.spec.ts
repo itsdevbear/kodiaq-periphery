@@ -19,7 +19,7 @@ enum RouterVersion {
   KodiaqRouter02 = 'KodiaqRouter02'
 }
 
-describe('UniswapV2Router{01,02}', () => {
+describe('KodiaqRouter{01,02}', () => {
   for (const routerVersion of Object.keys(RouterVersion)) {
     const provider = new MockProvider({
       hardfork: 'istanbul',
@@ -59,9 +59,9 @@ describe('UniswapV2Router{01,02}', () => {
     })
 
     describe(routerVersion, () => {
-      it('factory, WETH', async () => {
+      it('factory, WBERA', async () => {
         expect(await router.factory()).to.eq(factory.address)
-        expect(await router.WETH()).to.eq(WETH.address)
+        expect(await router.WBERA()).to.eq(WETH.address)
       })
 
       it('addLiquidity', async () => {

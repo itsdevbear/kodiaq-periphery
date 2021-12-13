@@ -17,7 +17,7 @@ contract ExampleFlashSwap is IUniswapV2Callee {
     constructor(address _factory, address _factoryV1, address router) public {
         factoryV1 = IUniswapV1Factory(_factoryV1);
         factory = _factory;
-        WETH = IWETH(IKodiaqRouter01(router).WETH());
+        WETH = IWETH(IKodiaqRouter01(router).WBERA());
     }
 
     // needs to accept ETH from any V1 exchange and WETH. ideally this could be enforced, as in the router,

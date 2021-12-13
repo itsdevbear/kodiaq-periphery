@@ -2,7 +2,7 @@ pragma solidity >=0.6.2;
 
 interface IKodiaqRouter01 {
     function factory() external pure returns (address);
-    function WETH() external pure returns (address);
+    function WBERA() external pure returns (address);
 
     function addLiquidity(
         address tokenA,
