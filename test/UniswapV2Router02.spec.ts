@@ -17,7 +17,7 @@ const overrides = {
   gasLimit: 9999999
 }
 
-describe('UniswapV2Router02', () => {
+describe('KodiaqRouter02', () => {
   const provider = new MockProvider({
     hardfork: 'istanbul',
     mnemonic: 'horn horn horn horn horn horn horn horn horn horn horn horn',
@@ -40,39 +40,39 @@ describe('UniswapV2Router02', () => {
     expect(await router.quote(bigNumberify(1), bigNumberify(100), bigNumberify(200))).to.eq(bigNumberify(2))
     expect(await router.quote(bigNumberify(2), bigNumberify(200), bigNumberify(100))).to.eq(bigNumberify(1))
     await expect(router.quote(bigNumberify(0), bigNumberify(100), bigNumberify(200))).to.be.revertedWith(
-      'UniswapV2Library: INSUFFICIENT_AMOUNT'
+      'KodiaqLibrary: INSUFFICIENT_AMOUNT'
     )
     await expect(router.quote(bigNumberify(1), bigNumberify(0), bigNumberify(200))).to.be.revertedWith(
-      'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
+      'KodiaqLibrary: INSUFFICIENT_LIQUIDITY'
     )
     await expect(router.quote(bigNumberify(1), bigNumberify(100), bigNumberify(0))).to.be.revertedWith(
-      'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
+      'KodiaqLibrary: INSUFFICIENT_LIQUIDITY'
     )
   })
 
   it('getAmountOut', async () => {
     expect(await router.getAmountOut(bigNumberify(2), bigNumberify(100), bigNumberify(100))).to.eq(bigNumberify(1))
     await expect(router.getAmountOut(bigNumberify(0), bigNumberify(100), bigNumberify(100))).to.be.revertedWith(
-      'UniswapV2Library: INSUFFICIENT_INPUT_AMOUNT'
+      'KodiaqLibrary: INSUFFICIENT_INPUT_AMOUNT'
     )
     await expect(router.getAmountOut(bigNumberify(2), bigNumberify(0), bigNumberify(100))).to.be.revertedWith(
-      'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
+      'KodiaqLibrary: INSUFFICIENT_LIQUIDITY'
     )
     await expect(router.getAmountOut(bigNumberify(2), bigNumberify(100), bigNumberify(0))).to.be.revertedWith(
-      'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
+      'KodiaqLibrary: INSUFFICIENT_LIQUIDITY'
     )
   })
 
   it('getAmountIn', async () => {
     expect(await router.getAmountIn(bigNumberify(1), bigNumberify(100), bigNumberify(100))).to.eq(bigNumberify(2))
     await expect(router.getAmountIn(bigNumberify(0), bigNumberify(100), bigNumberify(100))).to.be.revertedWith(
-      'UniswapV2Library: INSUFFICIENT_OUTPUT_AMOUNT'
+      'KodiaqLibrary: INSUFFICIENT_OUTPUT_AMOUNT'
     )
     await expect(router.getAmountIn(bigNumberify(1), bigNumberify(0), bigNumberify(100))).to.be.revertedWith(
-      'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
+      'KodiaqLibrary: INSUFFICIENT_LIQUIDITY'
     )
     await expect(router.getAmountIn(bigNumberify(1), bigNumberify(100), bigNumberify(0))).to.be.revertedWith(
-      'UniswapV2Library: INSUFFICIENT_LIQUIDITY'
+      'KodiaqLibrary: INSUFFICIENT_LIQUIDITY'
     )
   })
 
@@ -92,7 +92,7 @@ describe('UniswapV2Router02', () => {
     )
 
     await expect(router.getAmountsOut(bigNumberify(2), [token0.address])).to.be.revertedWith(
-      'UniswapV2Library: INVALID_PATH'
+      'KodiaqLibrary: INVALID_PATH'
     )
     const path = [token0.address, token1.address]
     expect(await router.getAmountsOut(bigNumberify(2), path)).to.deep.eq([bigNumberify(2), bigNumberify(1)])
@@ -114,7 +114,7 @@ describe('UniswapV2Router02', () => {
     )
 
     await expect(router.getAmountsIn(bigNumberify(1), [token0.address])).to.be.revertedWith(
-      'UniswapV2Library: INVALID_PATH'
+      'KodiaqLibrary: INVALID_PATH'
     )
     const path = [token0.address, token1.address]
     expect(await router.getAmountsIn(bigNumberify(1), path)).to.deep.eq([bigNumberify(2), bigNumberify(1)])
@@ -154,13 +154,13 @@ describe('fee-on-transfer tokens', () => {
 
   async function addLiquidity(DTTAmount: BigNumber, WETHAmount: BigNumber) {
     await DTT.approve(router.address, MaxUint256)
-    await router.addLiquidityETH(DTT.address, DTTAmount, DTTAmount, WETHAmount, wallet.address, MaxUint256, {
+    await router.addLiquidityBERA(DTT.address, DTTAmount, DTTAmount, WETHAmount, wallet.address, MaxUint256, {
       ...overrides,
       value: WETHAmount
     })
   }
 
-  it('removeLiquidityETHSupportingFeeOnTransferTokens', async () => {
+  it('removeLiquidityBERASupportingFeeOnTransferTokens', async () => {
     const DTTAmount = expandTo18Decimals(1)
     const ETHAmount = expandTo18Decimals(4)
     await addLiquidity(DTTAmount, ETHAmount)
@@ -173,7 +173,7 @@ describe('fee-on-transfer tokens', () => {
     const WETHExpected = WETHInPair.mul(liquidity).div(totalSupply)
 
     await pair.approve(router.address, MaxUint256)
-    await router.removeLiquidityETHSupportingFeeOnTransferTokens(
+    await router.removeLiquidityBERASupportingFeeOnTransferTokens(
       DTT.address,
       liquidity,
       NaiveDTTExpected,
@@ -184,7 +184,7 @@ describe('fee-on-transfer tokens', () => {
     )
   })
 
-  it('removeLiquidityETHWithPermitSupportingFeeOnTransferTokens', async () => {
+  it('removeLiquidityBERAWithPermitSupportingFeeOnTransferTokens', async () => {
     const DTTAmount = expandTo18Decimals(1)
       .mul(100)
       .div(99)
@@ -210,7 +210,7 @@ describe('fee-on-transfer tokens', () => {
     const WETHExpected = WETHInPair.mul(liquidity).div(totalSupply)
 
     await pair.approve(router.address, MaxUint256)
-    await router.removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
+    await router.removeLiquidityBERAWithPermitSupportingFeeOnTransferTokens(
       DTT.address,
       liquidity,
       NaiveDTTExpected,
@@ -266,7 +266,7 @@ describe('fee-on-transfer tokens', () => {
   })
 
   // ETH -> DTT
-  it('swapExactETHForTokensSupportingFeeOnTransferTokens', async () => {
+  it('swapExactBERAForTokensSupportingFeeOnTransferTokens', async () => {
     const DTTAmount = expandTo18Decimals(10)
       .mul(100)
       .div(99)
@@ -274,7 +274,7 @@ describe('fee-on-transfer tokens', () => {
     const swapAmount = expandTo18Decimals(1)
     await addLiquidity(DTTAmount, ETHAmount)
 
-    await router.swapExactETHForTokensSupportingFeeOnTransferTokens(
+    await router.swapExactBERAForTokensSupportingFeeOnTransferTokens(
       0,
       [WETH.address, DTT.address],
       wallet.address,
@@ -287,7 +287,7 @@ describe('fee-on-transfer tokens', () => {
   })
 
   // DTT -> ETH
-  it('swapExactTokensForETHSupportingFeeOnTransferTokens', async () => {
+  it('swapExactTokensForBERASupportingFeeOnTransferTokens', async () => {
     const DTTAmount = expandTo18Decimals(5)
       .mul(100)
       .div(99)
@@ -297,7 +297,7 @@ describe('fee-on-transfer tokens', () => {
     await addLiquidity(DTTAmount, ETHAmount)
     await DTT.approve(router.address, MaxUint256)
 
-    await router.swapExactTokensForETHSupportingFeeOnTransferTokens(
+    await router.swapExactTokensForBERASupportingFeeOnTransferTokens(
       swapAmount,
       0,
       [DTT.address, WETH.address],

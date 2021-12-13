@@ -15,8 +15,8 @@ const overrides = {
 }
 
 enum RouterVersion {
-  UniswapV2Router01 = 'UniswapV2Router01',
-  UniswapV2Router02 = 'UniswapV2Router02'
+  KodiaqRouter01 = 'KodiaqRouter01',
+  KodiaqRouter02 = 'KodiaqRouter02'
 }
 
 describe('UniswapV2Router{01,02}', () => {
@@ -46,8 +46,8 @@ describe('UniswapV2Router{01,02}', () => {
       WETHPartner = fixture.WETHPartner
       factory = fixture.factoryV2
       router = {
-        [RouterVersion.UniswapV2Router01]: fixture.router01,
-        [RouterVersion.UniswapV2Router02]: fixture.router02
+        [RouterVersion.KodiaqRouter01]: fixture.router01,
+        [RouterVersion.KodiaqRouter02]: fixture.router02
       }[routerVersion as RouterVersion]
       pair = fixture.pair
       WETHPair = fixture.WETHPair
@@ -100,7 +100,7 @@ describe('UniswapV2Router{01,02}', () => {
         expect(await pair.balanceOf(wallet.address)).to.eq(expectedLiquidity.sub(MINIMUM_LIQUIDITY))
       })
 
-      it('addLiquidityETH', async () => {
+      it('addLiquidityBERA', async () => {
         const WETHPartnerAmount = expandTo18Decimals(1)
         const ETHAmount = expandTo18Decimals(4)
 
@@ -108,7 +108,7 @@ describe('UniswapV2Router{01,02}', () => {
         const WETHPairToken0 = await WETHPair.token0()
         await WETHPartner.approve(router.address, MaxUint256)
         await expect(
-          router.addLiquidityETH(
+          router.addLiquidityBERA(
             WETHPartner.address,
             WETHPartnerAmount,
             WETHPartnerAmount,
@@ -181,7 +181,7 @@ describe('UniswapV2Router{01,02}', () => {
         expect(await token1.balanceOf(wallet.address)).to.eq(totalSupplyToken1.sub(2000))
       })
 
-      it('removeLiquidityETH', async () => {
+      it('removeLiquidityBERA', async () => {
         const WETHPartnerAmount = expandTo18Decimals(1)
         const ETHAmount = expandTo18Decimals(4)
         await WETHPartner.transfer(WETHPair.address, WETHPartnerAmount)
@@ -193,7 +193,7 @@ describe('UniswapV2Router{01,02}', () => {
         const WETHPairToken0 = await WETHPair.token0()
         await WETHPair.approve(router.address, MaxUint256)
         await expect(
-          router.removeLiquidityETH(
+          router.removeLiquidityBERA(
             WETHPartner.address,
             expectedLiquidity.sub(MINIMUM_LIQUIDITY),
             0,
@@ -266,7 +266,7 @@ describe('UniswapV2Router{01,02}', () => {
         )
       })
 
-      it('removeLiquidityETHWithPermit', async () => {
+      it('removeLiquidityBERAWithPermit', async () => {
         const WETHPartnerAmount = expandTo18Decimals(1)
         const ETHAmount = expandTo18Decimals(4)
         await WETHPartner.transfer(WETHPair.address, WETHPartnerAmount)
@@ -286,7 +286,7 @@ describe('UniswapV2Router{01,02}', () => {
 
         const { v, r, s } = ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(wallet.privateKey.slice(2), 'hex'))
 
-        await router.removeLiquidityETHWithPermit(
+        await router.removeLiquidityBERAWithPermit(
           WETHPartner.address,
           expectedLiquidity.sub(MINIMUM_LIQUIDITY),
           0,
@@ -368,8 +368,8 @@ describe('UniswapV2Router{01,02}', () => {
           const receipt = await tx.wait()
           expect(receipt.gasUsed).to.eq(
             {
-              [RouterVersion.UniswapV2Router01]: 101876,
-              [RouterVersion.UniswapV2Router02]: 101898
+              [RouterVersion.KodiaqRouter01]: 101854,
+              [RouterVersion.KodiaqRouter02]: 101898
             }[routerVersion as RouterVersion]
           )
         }).retries(3)
@@ -425,7 +425,7 @@ describe('UniswapV2Router{01,02}', () => {
         })
       })
 
-      describe('swapExactETHForTokens', () => {
+      describe('swapExactBERAForTokens', () => {
         const WETHPartnerAmount = expandTo18Decimals(10)
         const ETHAmount = expandTo18Decimals(5)
         const swapAmount = expandTo18Decimals(1)
@@ -443,7 +443,7 @@ describe('UniswapV2Router{01,02}', () => {
         it('happy path', async () => {
           const WETHPairToken0 = await WETHPair.token0()
           await expect(
-            router.swapExactETHForTokens(0, [WETH.address, WETHPartner.address], wallet.address, MaxUint256, {
+            router.swapExactBERAForTokens(0, [WETH.address, WETHPartner.address], wallet.address, MaxUint256, {
               ...overrides,
               value: swapAmount
             })
@@ -474,7 +474,7 @@ describe('UniswapV2Router{01,02}', () => {
 
         it('amounts', async () => {
           await expect(
-            routerEventEmitter.swapExactETHForTokens(
+            routerEventEmitter.swapExactBERAForTokens(
               router.address,
               0,
               [WETH.address, WETHPartner.address],
@@ -504,7 +504,7 @@ describe('UniswapV2Router{01,02}', () => {
 
           const swapAmount = expandTo18Decimals(1)
           await mineBlock(provider, (await provider.getBlock('latest')).timestamp + 1)
-          const tx = await router.swapExactETHForTokens(
+          const tx = await router.swapExactBERAForTokens(
             0,
             [WETH.address, WETHPartner.address],
             wallet.address,
@@ -517,14 +517,14 @@ describe('UniswapV2Router{01,02}', () => {
           const receipt = await tx.wait()
           expect(receipt.gasUsed).to.eq(
             {
-              [RouterVersion.UniswapV2Router01]: 138770,
-              [RouterVersion.UniswapV2Router02]: 138770
+              [RouterVersion.KodiaqRouter01]: 138748,
+              [RouterVersion.KodiaqRouter02]: 138748
             }[routerVersion as RouterVersion]
           )
         }).retries(3)
       })
 
-      describe('swapTokensForExactETH', () => {
+      describe('swapTokensForExactBERA', () => {
         const WETHPartnerAmount = expandTo18Decimals(5)
         const ETHAmount = expandTo18Decimals(10)
         const expectedSwapAmount = bigNumberify('557227237267357629')
@@ -541,7 +541,7 @@ describe('UniswapV2Router{01,02}', () => {
           await WETHPartner.approve(router.address, MaxUint256)
           const WETHPairToken0 = await WETHPair.token0()
           await expect(
-            router.swapTokensForExactETH(
+            router.swapTokensForExactBERA(
               outputAmount,
               MaxUint256,
               [WETHPartner.address, WETH.address],
@@ -577,7 +577,7 @@ describe('UniswapV2Router{01,02}', () => {
         it('amounts', async () => {
           await WETHPartner.approve(routerEventEmitter.address, MaxUint256)
           await expect(
-            routerEventEmitter.swapTokensForExactETH(
+            routerEventEmitter.swapTokensForExactBERA(
               router.address,
               outputAmount,
               MaxUint256,
@@ -592,7 +592,7 @@ describe('UniswapV2Router{01,02}', () => {
         })
       })
 
-      describe('swapExactTokensForETH', () => {
+      describe('swapExactTokensForBERA', () => {
         const WETHPartnerAmount = expandTo18Decimals(5)
         const ETHAmount = expandTo18Decimals(10)
         const swapAmount = expandTo18Decimals(1)
@@ -609,7 +609,7 @@ describe('UniswapV2Router{01,02}', () => {
           await WETHPartner.approve(router.address, MaxUint256)
           const WETHPairToken0 = await WETHPair.token0()
           await expect(
-            router.swapExactTokensForETH(
+            router.swapExactTokensForBERA(
               swapAmount,
               0,
               [WETHPartner.address, WETH.address],
@@ -645,7 +645,7 @@ describe('UniswapV2Router{01,02}', () => {
         it('amounts', async () => {
           await WETHPartner.approve(routerEventEmitter.address, MaxUint256)
           await expect(
-            routerEventEmitter.swapExactTokensForETH(
+            routerEventEmitter.swapExactTokensForBERA(
               router.address,
               swapAmount,
               0,
@@ -660,7 +660,7 @@ describe('UniswapV2Router{01,02}', () => {
         })
       })
 
-      describe('swapETHForExactTokens', () => {
+      describe('swapBERAForExactTokens', () => {
         const WETHPartnerAmount = expandTo18Decimals(10)
         const ETHAmount = expandTo18Decimals(5)
         const expectedSwapAmount = bigNumberify('557227237267357629')
@@ -676,7 +676,7 @@ describe('UniswapV2Router{01,02}', () => {
         it('happy path', async () => {
           const WETHPairToken0 = await WETHPair.token0()
           await expect(
-            router.swapETHForExactTokens(
+            router.swapBERAForExactTokens(
               outputAmount,
               [WETH.address, WETHPartner.address],
               wallet.address,
@@ -713,7 +713,7 @@ describe('UniswapV2Router{01,02}', () => {
 
         it('amounts', async () => {
           await expect(
-            routerEventEmitter.swapETHForExactTokens(
+            routerEventEmitter.swapBERAForExactTokens(
               router.address,
               outputAmount,
               [WETH.address, WETHPartner.address],
