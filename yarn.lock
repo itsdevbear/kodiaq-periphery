@@ -2,9 +2,9 @@
 # yarn lockfile v1
 
 
-"@berachain/kodiaq-core@git+https://www.github.com/BeraChain/kodiaq-core.git":
+"@berachain/kodiaq-core@git+https://www.github.com/BeraChain/kodiaq-core.git#f663b383af2722dea70ca94763bef309449ae801":
   version "1.0.1"
-  resolved "git+https://www.github.com/BeraChain/kodiaq-core.git#494b2e6d41c49f5275f8a5080e5b137e06b4a111"
+  resolved "git+https://www.github.com/BeraChain/kodiaq-core.git#f663b383af2722dea70ca94763bef309449ae801"
 
 "@ethereum-waffle/chai@^2.5.1":
   version "2.5.1"
@@ -335,11 +335,6 @@
   version "4.0.1-alpha"
   resolved "https://registry.yarnpkg.com/@uniswap/lib/-/lib-4.0.1-alpha.tgz#2881008e55f075344675b3bca93f020b028fbd02"
   integrity sha512-f6UIliwBbRsgVLxIaBANF6w09tYqc6Y/qXdsrbEmXHyFA7ILiKrIwRFXe1yOg8M3cksgVsO9N7yuL2DdCGQKBA==
-
-"@uniswap/v2-core@1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@uniswap/v2-core/-/v2-core-1.0.0.tgz#e0fab91a7d53e8cafb5326ae4ca18351116b0844"
-  integrity sha512-BJiXrBGnN8mti7saW49MXwxDBRFiWemGetE58q8zgfnPPzQKq55ADltEILqOt6VFZ22kVeVKbF8gVd8aY3l7pA==
 
 "@yarnpkg/lockfile@^1.1.0":
   version "1.1.0"

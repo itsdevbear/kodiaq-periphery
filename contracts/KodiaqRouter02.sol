@@ -2,8 +2,8 @@ pragma solidity =0.6.6;
 
 import '@berachain/kodiaq-core/contracts/interfaces/IKodiaqFactory.sol';
 import '@berachain/kodiaq-core/contracts/interfaces/IKodiaqPair.sol';
-import '@uniswap/lib/contracts/libraries/TransferHelper.sol';
 
+import './libraries/SafeTransferLib.sol';
 import './interfaces/IKodiaqRouter02.sol';
 import './libraries/KodiaqLibrary.sol';
 import './libraries/SafeMath.sol';
@@ -71,8 +71,8 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
     ) external virtual override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
         (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
         address pair = KodiaqLibrary.pairFor(factory, tokenA, tokenB);
-        TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
-        TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
+        SafeTransferLib.safeTransferFrom(tokenA, msg.sender, pair, amountA);
+        SafeTransferLib.safeTransferFrom(tokenB, msg.sender, pair, amountB);
         liquidity = IKodiaqPair(pair).mint(to);
     }
     function addLiquidityBERA(
@@ -92,12 +92,12 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
             amountBERAMin
         );
         address pair = KodiaqLibrary.pairFor(factory, token, WBERA);
-        TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
+        SafeTransferLib.safeTransferFrom(token, msg.sender, pair, amountToken);
         IWBERA(WBERA).deposit{value: amountBERA}();
         assert(IWBERA(WBERA).transfer(pair, amountBERA));
         liquidity = IKodiaqPair(pair).mint(to);
         // refund dust BERA, if any
-        if (msg.value > amountBERA) TransferHelper.safeTransferETH(msg.sender, msg.value - amountBERA);
+        if (msg.value > amountBERA) SafeTransferLib.safeTransferBERA(msg.sender, msg.value - amountBERA);
     }
 
     // **** REMOVE LIQUIDITY ****
@@ -135,9 +135,9 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
             address(this),
             deadline
         );
-        TransferHelper.safeTransfer(token, to, amountToken);
+        SafeTransferLib.safeTransfer(token, to, amountToken);
         IWBERA(WBERA).withdraw(amountBERA);
-        TransferHelper.safeTransferETH(to, amountBERA);
+        SafeTransferLib.safeTransferBERA(to, amountBERA);
     }
     function removeLiquidityWithPermit(
         address tokenA,
@@ -187,9 +187,9 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
             address(this),
             deadline
         );
-        TransferHelper.safeTransfer(token, to, IERC20(token).balanceOf(address(this)));
+        SafeTransferLib.safeTransfer(token, to, IERC20(token).balanceOf(address(this)));
         IWBERA(WBERA).withdraw(amountBERA);
-        TransferHelper.safeTransferETH(to, amountBERA);
+        SafeTransferLib.safeTransferBERA(to, amountBERA);
     }
     function removeLiquidityBERAWithPermitSupportingFeeOnTransferTokens(
         address token,
@@ -231,7 +231,7 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
         amounts = KodiaqLibrary.getAmountsOut(factory, amountIn, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'KodiaqRouter: INSUFFICIENT_OUTPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(
+        SafeTransferLib.safeTransferFrom(
             path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, to);
@@ -245,7 +245,7 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
     ) external virtual override ensure(deadline) returns (uint[] memory amounts) {
         amounts = KodiaqLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, 'KodiaqRouter: EXCESSIVE_INPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(
+        SafeTransferLib.safeTransferFrom(
             path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, to);
@@ -275,12 +275,12 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
         require(path[path.length - 1] == WBERA, 'KodiaqRouter: INVALID_PATH');
         amounts = KodiaqLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, 'KodiaqRouter: EXCESSIVE_INPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(
+        SafeTransferLib.safeTransferFrom(
             path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, address(this));
         IWBERA(WBERA).withdraw(amounts[amounts.length - 1]);
-        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
+        SafeTransferLib.safeTransferBERA(to, amounts[amounts.length - 1]);
     }
     function swapExactTokensForBERA(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
         external
@@ -292,12 +292,12 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
         require(path[path.length - 1] == WBERA, 'KodiaqRouter: INVALID_PATH');
         amounts = KodiaqLibrary.getAmountsOut(factory, amountIn, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'KodiaqRouter: INSUFFICIENT_OUTPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(
+        SafeTransferLib.safeTransferFrom(
             path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]
         );
         _swap(amounts, path, address(this));
         IWBERA(WBERA).withdraw(amounts[amounts.length - 1]);
-        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
+        SafeTransferLib.safeTransferBERA(to, amounts[amounts.length - 1]);
     }
     function swapBERAForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
         external
@@ -314,7 +314,7 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
         assert(IWBERA(WBERA).transfer(KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
         // refund dust eth, if any
-        if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]);
+        if (msg.value > amounts[0]) SafeTransferLib.safeTransferBERA(msg.sender, msg.value - amounts[0]);
     }
 
     // **** SWAP (supporting fee-on-transfer tokens) ****
@@ -344,7 +344,7 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
         address to,
         uint deadline
     ) external virtual override ensure(deadline) {
-        TransferHelper.safeTransferFrom(
+        SafeTransferLib.safeTransferFrom(
             path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amountIn
         );
         uint balanceBefore = IERC20(path[path.length - 1]).balanceOf(to);
@@ -390,14 +390,14 @@ contract KodiaqRouter02 is IKodiaqRouter02 {
         ensure(deadline)
     {
         require(path[path.length - 1] == WBERA, 'KodiaqRouter: INVALID_PATH');
-        TransferHelper.safeTransferFrom(
+        SafeTransferLib.safeTransferFrom(
             path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amountIn
         );
         _swapSupportingFeeOnTransferTokens(path, address(this));
         uint amountOut = IERC20(WBERA).balanceOf(address(this));
         require(amountOut >= amountOutMin, 'KodiaqRouter: INSUFFICIENT_OUTPUT_AMOUNT');
         IWBERA(WBERA).withdraw(amountOut);
-        TransferHelper.safeTransferETH(to, amountOut);
+        SafeTransferLib.safeTransferBERA(to, amountOut);
     }
 
     // **** LIBRARY FUNCTIONS ****

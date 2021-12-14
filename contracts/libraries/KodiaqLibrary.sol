@@ -21,7 +21,7 @@ library KodiaqLibrary {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'47212ff77492a17d3db3c8a1ce13bc2ae5fa7738571f11f468568feae23a6b09' // init code hash
+                hex'30c1766ed0b455a626399325ffebbda997d7486e0debe0d514b35b362d87cbc9' // init code hash
             ))));
     }
 

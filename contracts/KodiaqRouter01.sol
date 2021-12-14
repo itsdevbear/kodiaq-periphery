@@ -1,8 +1,8 @@
 pragma solidity =0.6.6;
 
 import '@berachain/kodiaq-core/contracts/interfaces/IKodiaqFactory.sol';
-import '@uniswap/lib/contracts/libraries/TransferHelper.sol';
 
+import './libraries/SafeTransferLib.sol';
 import './libraries/KodiaqLibrary.sol';
 import './interfaces/IKodiaqRouter01.sol';
 import './interfaces/IERC20.sol';
@@ -67,8 +67,8 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
     ) external override ensure(deadline) returns (uint amountA, uint amountB, uint liquidity) {
         (amountA, amountB) = _addLiquidity(tokenA, tokenB, amountADesired, amountBDesired, amountAMin, amountBMin);
         address pair = KodiaqLibrary.pairFor(factory, tokenA, tokenB);
-        TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
-        TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
+        SafeTransferLib.safeTransferFrom(tokenA, msg.sender, pair, amountA);
+        SafeTransferLib.safeTransferFrom(tokenB, msg.sender, pair, amountB);
         liquidity = IKodiaqPair(pair).mint(to);
     }
     function addLiquidityBERA(
@@ -88,11 +88,11 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
             amountBERAMin
         );
         address pair = KodiaqLibrary.pairFor(factory, token, WBERA);
-        TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
+        SafeTransferLib.safeTransferFrom(token, msg.sender, pair, amountToken);
         IWBERA(WBERA).deposit{value: amountBERA}();
         assert(IWBERA(WBERA).transfer(pair, amountBERA));
         liquidity = IKodiaqPair(pair).mint(to);
-        if (msg.value > amountBERA) TransferHelper.safeTransferETH(msg.sender, msg.value - amountBERA); // refund dust BERA, if any
+        if (msg.value > amountBERA) SafeTransferLib.safeTransferBERA(msg.sender, msg.value - amountBERA); // refund dust BERA, if any
     }
 
     // **** REMOVE LIQUIDITY ****
@@ -130,9 +130,9 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
             address(this),
             deadline
         );
-        TransferHelper.safeTransfer(token, to, amountToken);
+        SafeTransferLib.safeTransfer(token, to, amountToken);
         IWBERA(WBERA).withdraw(amountBERA);
-        TransferHelper.safeTransferETH(to, amountBERA);
+        SafeTransferLib.safeTransferBERA(to, amountBERA);
     }
     function removeLiquidityWithPermit(
         address tokenA,
@@ -185,7 +185,7 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
     ) external override ensure(deadline) returns (uint[] memory amounts) {
         amounts = KodiaqLibrary.getAmountsOut(factory, amountIn, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'KodiaqRouter: INSUFFICIENT_OUTPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
+        SafeTransferLib.safeTransferFrom(path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
         _swap(amounts, path, to);
     }
     function swapTokensForExactTokens(
@@ -197,7 +197,7 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
     ) external override ensure(deadline) returns (uint[] memory amounts) {
         amounts = KodiaqLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, 'KodiaqRouter: EXCESSIVE_INPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
+        SafeTransferLib.safeTransferFrom(path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
         _swap(amounts, path, to);
     }
     function swapExactBERAForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
@@ -223,10 +223,10 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
         require(path[path.length - 1] == WBERA, 'KodiaqRouter: INVALID_PATH');
         amounts = KodiaqLibrary.getAmountsIn(factory, amountOut, path);
         require(amounts[0] <= amountInMax, 'KodiaqRouter: EXCESSIVE_INPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
+        SafeTransferLib.safeTransferFrom(path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
         _swap(amounts, path, address(this));
         IWBERA(WBERA).withdraw(amounts[amounts.length - 1]);
-        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
+        SafeTransferLib.safeTransferBERA(to, amounts[amounts.length - 1]);
     }
     function swapExactTokensForBERA(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
         external
@@ -237,10 +237,10 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
         require(path[path.length - 1] == WBERA, 'KodiaqRouter: INVALID_PATH');
         amounts = KodiaqLibrary.getAmountsOut(factory, amountIn, path);
         require(amounts[amounts.length - 1] >= amountOutMin, 'KodiaqRouter: INSUFFICIENT_OUTPUT_AMOUNT');
-        TransferHelper.safeTransferFrom(path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
+        SafeTransferLib.safeTransferFrom(path[0], msg.sender, KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]);
         _swap(amounts, path, address(this));
         IWBERA(WBERA).withdraw(amounts[amounts.length - 1]);
-        TransferHelper.safeTransferETH(to, amounts[amounts.length - 1]);
+        SafeTransferLib.safeTransferBERA(to, amounts[amounts.length - 1]);
     }
     function swapBERAForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
         external
@@ -255,7 +255,7 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
         IWBERA(WBERA).deposit{value: amounts[0]}();
         assert(IWBERA(WBERA).transfer(KodiaqLibrary.pairFor(factory, path[0], path[1]), amounts[0]));
         _swap(amounts, path, to);
-        if (msg.value > amounts[0]) TransferHelper.safeTransferETH(msg.sender, msg.value - amounts[0]); // refund dust BERA, if any
+        if (msg.value > amounts[0]) SafeTransferLib.safeTransferBERA(msg.sender, msg.value - amounts[0]); // refund dust BERA, if any
     }
 
     function quote(uint amountA, uint reserveA, uint reserveB) public pure override returns (uint amountB) {

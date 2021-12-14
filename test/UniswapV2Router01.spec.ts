@@ -368,8 +368,8 @@ describe('KodiaqRouter{01,02}', () => {
           const receipt = await tx.wait()
           expect(receipt.gasUsed).to.eq(
             {
-              [RouterVersion.KodiaqRouter01]: 101854,
-              [RouterVersion.KodiaqRouter02]: 101898
+              [RouterVersion.KodiaqRouter01]: 100671,
+              [RouterVersion.KodiaqRouter02]: 100715
             }[routerVersion as RouterVersion]
           )
         }).retries(3)
@@ -517,8 +517,8 @@ describe('KodiaqRouter{01,02}', () => {
           const receipt = await tx.wait()
           expect(receipt.gasUsed).to.eq(
             {
-              [RouterVersion.KodiaqRouter01]: 138748,
-              [RouterVersion.KodiaqRouter02]: 138748
+              [RouterVersion.KodiaqRouter01]: 138233,
+              [RouterVersion.KodiaqRouter02]: 138233
             }[routerVersion as RouterVersion]
           )
         }).retries(3)
