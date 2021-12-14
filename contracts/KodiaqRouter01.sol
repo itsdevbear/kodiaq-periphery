@@ -1,6 +1,6 @@
 pragma solidity =0.6.6;
 
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
+import '@berachain/kodiaq-core/contracts/interfaces/IKodiaqFactory.sol';
 import '@uniswap/lib/contracts/libraries/TransferHelper.sol';
 
 import './libraries/KodiaqLibrary.sol';
@@ -36,8 +36,8 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
         uint amountBMin
     ) private returns (uint amountA, uint amountB) {
         // create the pair if it doesn't exist yet
-        if (IUniswapV2Factory(factory).getPair(tokenA, tokenB) == address(0)) {
-            IUniswapV2Factory(factory).createPair(tokenA, tokenB);
+        if (IKodiaqFactory(factory).getPair(tokenA, tokenB) == address(0)) {
+            IKodiaqFactory(factory).createPair(tokenA, tokenB);
         }
         (uint reserveA, uint reserveB) = KodiaqLibrary.getReserves(factory, tokenA, tokenB);
         if (reserveA == 0 && reserveB == 0) {
@@ -69,7 +69,7 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
         address pair = KodiaqLibrary.pairFor(factory, tokenA, tokenB);
         TransferHelper.safeTransferFrom(tokenA, msg.sender, pair, amountA);
         TransferHelper.safeTransferFrom(tokenB, msg.sender, pair, amountB);
-        liquidity = IUniswapV2Pair(pair).mint(to);
+        liquidity = IKodiaqPair(pair).mint(to);
     }
     function addLiquidityBERA(
         address token,
@@ -91,7 +91,7 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
         TransferHelper.safeTransferFrom(token, msg.sender, pair, amountToken);
         IWBERA(WBERA).deposit{value: amountBERA}();
         assert(IWBERA(WBERA).transfer(pair, amountBERA));
-        liquidity = IUniswapV2Pair(pair).mint(to);
+        liquidity = IKodiaqPair(pair).mint(to);
         if (msg.value > amountBERA) TransferHelper.safeTransferETH(msg.sender, msg.value - amountBERA); // refund dust BERA, if any
     }
 
@@ -106,8 +106,8 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
         uint deadline
     ) public override ensure(deadline) returns (uint amountA, uint amountB) {
         address pair = KodiaqLibrary.pairFor(factory, tokenA, tokenB);
-        IUniswapV2Pair(pair).transferFrom(msg.sender, pair, liquidity); // send liquidity to pair
-        (uint amount0, uint amount1) = IUniswapV2Pair(pair).burn(to);
+        IKodiaqPair(pair).transferFrom(msg.sender, pair, liquidity); // send liquidity to pair
+        (uint amount0, uint amount1) = IKodiaqPair(pair).burn(to);
         (address token0,) = KodiaqLibrary.sortTokens(tokenA, tokenB);
         (amountA, amountB) = tokenA == token0 ? (amount0, amount1) : (amount1, amount0);
         require(amountA >= amountAMin, 'KodiaqRouter: INSUFFICIENT_A_AMOUNT');
@@ -146,7 +146,7 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
     ) external override returns (uint amountA, uint amountB) {
         address pair = KodiaqLibrary.pairFor(factory, tokenA, tokenB);
         uint value = approveMax ? uint(-1) : liquidity;
-        IUniswapV2Pair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
+        IKodiaqPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
         (amountA, amountB) = removeLiquidity(tokenA, tokenB, liquidity, amountAMin, amountBMin, to, deadline);
     }
     function removeLiquidityBERAWithPermit(
@@ -160,7 +160,7 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
     ) external override returns (uint amountToken, uint amountBERA) {
         address pair = KodiaqLibrary.pairFor(factory, token, WBERA);
         uint value = approveMax ? uint(-1) : liquidity;
-        IUniswapV2Pair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
+        IKodiaqPair(pair).permit(msg.sender, address(this), value, deadline, v, r, s);
         (amountToken, amountBERA) = removeLiquidityBERA(token, liquidity, amountTokenMin, amountBERAMin, to, deadline);
     }
 
@@ -173,7 +173,7 @@ contract KodiaqRouter01 is IKodiaqRouter01 {
             uint amountOut = amounts[i + 1];
             (uint amount0Out, uint amount1Out) = input == token0 ? (uint(0), amountOut) : (amountOut, uint(0));
             address to = i < path.length - 2 ? KodiaqLibrary.pairFor(factory, output, path[i + 2]) : _to;
-            IUniswapV2Pair(KodiaqLibrary.pairFor(factory, input, output)).swap(amount0Out, amount1Out, to, new bytes(0));
+            IKodiaqPair(KodiaqLibrary.pairFor(factory, input, output)).swap(amount0Out, amount1Out, to, new bytes(0));
         }
     }
     function swapExactTokensForTokens(

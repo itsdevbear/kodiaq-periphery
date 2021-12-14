@@ -2,6 +2,10 @@
 # yarn lockfile v1
 
 
+"@berachain/kodiaq-core@git+https://www.github.com/BeraChain/kodiaq-core.git":
+  version "1.0.1"
+  resolved "git+https://www.github.com/BeraChain/kodiaq-core.git#494b2e6d41c49f5275f8a5080e5b137e06b4a111"
+
 "@ethereum-waffle/chai@^2.5.1":
   version "2.5.1"
   resolved "https://registry.yarnpkg.com/@ethereum-waffle/chai/-/chai-2.5.1.tgz#8bdc055952fc80ff78132571396a2771a36d97ae"

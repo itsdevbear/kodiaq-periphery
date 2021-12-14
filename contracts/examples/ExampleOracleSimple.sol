@@ -1,7 +1,6 @@
 pragma solidity =0.6.6;
 
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
+import '@berachain/kodiaq-core/contracts/interfaces/IKodiaqPair.sol';
 import '@uniswap/lib/contracts/libraries/FixedPoint.sol';
 
 import '../libraries/KodiaqOracleLibrary.sol';
@@ -14,7 +13,7 @@ contract ExampleOracleSimple {
 
     uint public constant PERIOD = 24 hours;
 
-    IUniswapV2Pair immutable pair;
+    IKodiaqPair immutable pair;
     address public immutable token0;
     address public immutable token1;
 
@@ -25,7 +24,7 @@ contract ExampleOracleSimple {
     FixedPoint.uq112x112 public price1Average;
 
     constructor(address factory, address tokenA, address tokenB) public {
-        IUniswapV2Pair _pair = IUniswapV2Pair(KodiaqLibrary.pairFor(factory, tokenA, tokenB));
+        IKodiaqPair _pair = IKodiaqPair(KodiaqLibrary.pairFor(factory, tokenA, tokenB));
         pair = _pair;
         token0 = _pair.token0();
         token1 = _pair.token1();

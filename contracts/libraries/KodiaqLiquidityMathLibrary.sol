@@ -1,7 +1,7 @@
 pragma solidity >=0.5.0;
 
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol';
-import '@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol';
+import '@berachain/kodiaq-core/contracts/interfaces/IKodiaqPair.sol';
+import '@berachain/kodiaq-core/contracts/interfaces/IKodiaqFactory.sol';
 import '@uniswap/lib/contracts/libraries/Babylonian.sol';
 import '@uniswap/lib/contracts/libraries/FullMath.sol';
 
@@ -104,8 +104,8 @@ library KodiaqLiquidityMathLibrary {
         uint256 liquidityAmount
     ) internal view returns (uint256 tokenAAmount, uint256 tokenBAmount) {
         (uint256 reservesA, uint256 reservesB) = KodiaqLibrary.getReserves(factory, tokenA, tokenB);
-        IUniswapV2Pair pair = IUniswapV2Pair(KodiaqLibrary.pairFor(factory, tokenA, tokenB));
-        bool feeOn = IUniswapV2Factory(factory).feeTo() != address(0);
+        IKodiaqPair pair = IKodiaqPair(KodiaqLibrary.pairFor(factory, tokenA, tokenB));
+        bool feeOn = IKodiaqFactory(factory).feeTo() != address(0);
         uint kLast = feeOn ? pair.kLast() : 0;
         uint totalSupply = pair.totalSupply();
         return computeLiquidityValue(reservesA, reservesB, totalSupply, liquidityAmount, feeOn, kLast);
@@ -124,8 +124,8 @@ library KodiaqLiquidityMathLibrary {
         uint256 tokenAAmount,
         uint256 tokenBAmount
     ) {
-        bool feeOn = IUniswapV2Factory(factory).feeTo() != address(0);
-        IUniswapV2Pair pair = IUniswapV2Pair(KodiaqLibrary.pairFor(factory, tokenA, tokenB));
+        bool feeOn = IKodiaqFactory(factory).feeTo() != address(0);
+        IKodiaqPair pair = IKodiaqPair(KodiaqLibrary.pairFor(factory, tokenA, tokenB));
         uint kLast = feeOn ? pair.kLast() : 0;
         uint totalSupply = pair.totalSupply();
 
